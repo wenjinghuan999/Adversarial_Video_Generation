@@ -3,7 +3,9 @@ import numpy as np
 from scipy.ndimage import imread
 from glob import glob
 import os
+import random
 from six.moves import xrange
+from data_fetcher import CachedDataFetcher
 
 import constants as c
 from tfutils import log10
@@ -131,6 +133,19 @@ def get_full_clips(data_dir, num_clips, num_rec_out=1):
 
     return clips
 
+def get_data(batch_size, num_rec_out=1, skip=None):
+    episode_length = c.HIST_LEN + num_rec_out
+    rh, u = get_data.data_fetcher.fetch_episodes(batch_size, episode_length, skip=skip)
+    clips = np.concatenate((rh, u), 4)
+    clips = np.reshape(np.transpose(clips, [0, 2, 3, 1, 4]), [batch_size, 64, 64, 3 * episode_length])
+    return clips
+get_data.data_fetcher = CachedDataFetcher(c.RPC_HOST, c.RPC_PORT)
+
+def get_data_random(batch_size, num_rec_out=1):
+    episode_length = c.HIST_LEN + num_rec_out
+    skip = [random.randint(0, episode_length - 1) for _ in range(batch_size)]
+    return get_data(batch_size, num_rec_out, skip)
+
 def process_clip():
     """
     Gets a clip from the train dataset, cropped randomly to c.TRAIN_HEIGHT x c.TRAIN_WIDTH.
@@ -161,15 +176,18 @@ def get_train_batch():
     @return: An array of shape
             [c.BATCH_SIZE, c.TRAIN_HEIGHT, c.TRAIN_WIDTH, (3 * (c.HIST_LEN + 1))].
     """
-    clips = np.empty([c.BATCH_SIZE, c.TRAIN_HEIGHT, c.TRAIN_WIDTH, (3 * (c.HIST_LEN + 1))],
-                     dtype=np.float32)
-    for i in xrange(c.BATCH_SIZE):
-        path = c.TRAIN_DIR_CLIPS + str(np.random.choice(c.NUM_CLIPS)) + '.npz'
-        clip = np.load(path)['arr_0']
 
-        clips[i] = clip
+    return get_data_random(c.BATCH_SIZE)
+    # clips = np.empty([c.BATCH_SIZE, c.TRAIN_HEIGHT, c.TRAIN_WIDTH, (3 * (c.HIST_LEN + 1))],
+    #                  dtype=np.float32)
+    # for i in xrange(c.BATCH_SIZE):
+    #     path = c.TRAIN_DIR_CLIPS + str(np.random.choice(c.NUM_CLIPS)) + '.npz'
+    #     clip = np.load(path)['arr_0']
+    #
+    #     clips[i] = clip
+    #
+    # return clips
 
-    return clips
 
 
 def get_test_batch(test_batch_size, num_rec_out=1):
@@ -184,7 +202,8 @@ def get_test_batch(test_batch_size, num_rec_out=1):
              [test_batch_size, c.TEST_HEIGHT, c.TEST_WIDTH, (3 * (c.HIST_LEN + num_rec_out))].
              A batch of frame sequences with values normalized in range [-1, 1].
     """
-    return get_full_clips(c.TEST_DIR, test_batch_size, num_rec_out=num_rec_out)
+    return get_data(test_batch_size, num_rec_out)
+    # return get_full_clips(c.TEST_DIR, test_batch_size, num_rec_out=num_rec_out)
 
 
 ##

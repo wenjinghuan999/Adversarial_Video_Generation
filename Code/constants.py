@@ -204,3 +204,6 @@ SCALE_FC_LAYER_SIZES_D = [[512, 256, 1],
                           [1024, 512, 1],
                           [1024, 512, 1],
                           [1024, 512, 1]]
+
+RPC_HOST = 'localhost'
+RPC_PORT = 50077

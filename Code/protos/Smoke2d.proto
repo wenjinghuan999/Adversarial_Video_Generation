@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package ssv;
+
+service Smoke2d {
+	rpc Init(Smoke2dInitParams) returns (Result) {}
+	rpc Step(Smoke2dStepParams) returns (Result) {}
+	rpc Reset(Smoke2dResetParams) returns (Result) {}
+	rpc Destroy(Smoke2dDestroyParams) returns (Result) {}
+
+	rpc GetData(Smoke2dGetDataParams) returns (stream DataChunk) {}
+}
+
+message Smoke2dInitParams {
+	uint32 nx = 1;
+	uint32 ny = 2;
+}
+
+message Smoke2dStepParams {
+
+}
+
+message Smoke2dResetParams {
+
+}
+
+message Smoke2dDestroyParams {
+
+}
+
+message Smoke2dGetDataParams {
+	uint32 property = 1;
+}
+
+message Result {
+	uint32 status = 1;
+}
+
+message DataChunk {
+	bytes data = 1;
+}
