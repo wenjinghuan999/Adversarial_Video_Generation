@@ -312,9 +312,10 @@ class GeneratorModel:
                 for i, img in enumerate(gt_frames):
                     # for skimage.transform.resize, images need to be in range [0, 1], so normalize
                     # to [0, 1] before resize and back to [-1, 1] after
-                    sknorm_img = (img / 2) + 0.5
+                    mi, ma = img.min(), img.max()
+                    sknorm_img = (img - mi) / (ma - mi)
                     resized_frame = resize(sknorm_img, [scale_height, scale_width, 3])
-                    scaled_gt_frames[i] = (resized_frame - 0.5) * 2
+                    scaled_gt_frames[i] = resized_frame * (ma - mi) + mi
                 scale_gts.append(scaled_gt_frames)
 
             # for every clip in the batch, save the inputs, scale preds and scale gts
