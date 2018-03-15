@@ -109,6 +109,7 @@ class AVGRunner:
 def usage():
     print('Options:')
     print('-l/--load_path=    <Relative/path/to/saved/model>')
+    print('-p/--grpc_port=    <port to load data>')
     print('-t/--test_dir=     <Directory of test images>')
     print('-r/--recursions=   <# recursive predictions to make on test>')
     print('-a/--adversarial=  <{t/f}> (Whether to use adversarial training. Default=True)')
@@ -134,8 +135,8 @@ def main():
     num_test_rec = 1  # number of recursive predictions to make on test
     num_steps = 1000001
     try:
-        opts, _ = getopt.getopt(sys.argv[1:], 'l:t:r:a:n:s:OTH',
-                                ['load_path=', 'test_dir=', 'recursions=', 'adversarial=', 'name=',
+        opts, _ = getopt.getopt(sys.argv[1:], 'l:p:t:r:a:n:s:OTH',
+                                ['load_path=', 'grpc_port=', 'test_dir=', 'recursions=', 'adversarial=', 'name=',
                                  'steps=', 'overwrite', 'test_only', 'help', 'stats_freq=',
                                  'summary_freq=', 'img_save_freq=', 'test_freq=',
                                  'model_save_freq='])
@@ -146,6 +147,8 @@ def main():
     for opt, arg in opts:
         if opt in ('-l', '--load_path'):
             load_path = arg
+        if opt in ('-p', '--grpc-port'):
+            c.RPC_PORT = arg
         if opt in ('-t', '--test_dir'):
             c.set_test_dir(arg)
         if opt in ('-r', '--recursions'):
