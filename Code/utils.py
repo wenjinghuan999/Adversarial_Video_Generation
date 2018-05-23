@@ -134,12 +134,14 @@ def get_full_clips(data_dir, num_clips, num_rec_out=1):
     return clips
 
 def get_data(batch_size, num_rec_out=1, skip=None):
+    if get_data.data_fetcher is None:
+        get_data.data_fetcher = CachedDataFetcher(c.RPC_HOST, c.RPC_PORT)
     episode_length = c.HIST_LEN + num_rec_out
     rh, u = get_data.data_fetcher.fetch_episodes(batch_size, episode_length, skip=skip)
     clips = np.concatenate((rh, u), 4)
     clips = np.reshape(np.transpose(clips, [0, 2, 3, 1, 4]), [batch_size, 64, 64, 3 * episode_length])
     return clips
-get_data.data_fetcher = CachedDataFetcher(c.RPC_HOST, c.RPC_PORT)
+get_data.data_fetcher = None
 
 def get_data_random(batch_size, num_rec_out=1):
     episode_length = c.HIST_LEN + num_rec_out
